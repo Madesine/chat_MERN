@@ -1,16 +1,22 @@
 const express = require("express");
-const connectDb = require("./config/db");
+const mongoose = require("mongoose");
+
+const connectDb = require("./api/database/connectToDb");
+const auth = require("./api/routes/auth");
 
 const app = express();
 
-connectDb();
+app.use("/api/auth", auth);
 
-app.get("/", (req, res) => {
-	res.send("I'm running");
-});
+connectDb();
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-	console.log("Server is here *-*");
+const server = app.listen(PORT, () => {
+  console.log(`Server is running ${PORT}`);
+});
+
+process.on("SIGINT", () => {
+  mongoose.connection.close();
+  server.close();
 });
