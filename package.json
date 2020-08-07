@@ -6,7 +6,6 @@
 	"scripts": {
 		"start": "node server.js",
 		"dev": "nodemon server.js",
-		"precommit":"lint-staged"
 	},
 	"repository": {
 		"type": "git",
@@ -36,5 +35,17 @@
 		"husky": "^4.2.5",
 		"lint-staged": "^10.2.11",
 		"nodemon": "^2.0.4"
+	},
+	"husky": {
+		"hooks": {
+			"precommit": "lint-staged"
+		}
+	},
+	"lint-staged": {
+		"*.{js,jsx}": [
+			"eslint --max-warnings=0",
+			"prettier --write",
+			"git add"
+		]
 	}
 }
