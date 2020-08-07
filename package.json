@@ -5,7 +5,7 @@
 	"main": "server.js",
 	"scripts": {
 		"start": "node server.js",
-		"dev": "nodemon server.js",
+		"dev": "nodemon server.js"
 	},
 	"repository": {
 		"type": "git",
@@ -44,8 +44,7 @@
 	"lint-staged": {
 		"*.{js,jsx}": [
 			"eslint --max-warnings=0",
-			"prettier --write",
-			"git add"
+			"prettier --write"
 		]
 	}
 }
