@@ -1,8 +1,9 @@
 const bcrypt = require("bcryptjs");
 
 const User = require("../database/models/User");
+const getToken = require("../helpers/getToken");
 
-const login = async (req, res) => {
+const register = async (req, res) => {
   const { name, email, password } = req.body;
 
   try {
@@ -18,6 +19,8 @@ const login = async (req, res) => {
     user.password = await bcrypt.hash(password, salt);
 
     await user.save();
+
+    getToken();
   } catch (error) {
     console.error(error.message);
 
@@ -26,4 +29,4 @@ const login = async (req, res) => {
   res.json({ msg: "Hello world" });
 };
 
-module.exports = { login };
+module.exports = { register };
