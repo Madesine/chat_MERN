@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 const config = require("config");
 
-const authMiddleware = (req, res, next) => {
+const setTokenMiddleware = (req, res, next) => {
   const token = req.header("auth-token");
 
   if (!token) {
@@ -18,4 +18,21 @@ const authMiddleware = (req, res, next) => {
   }
 };
 
-module.exports = { authMiddleware };
+const validationMiddleware = schema => {
+  return (req, res, next) => {
+    const { error } = schema.validate(req.body);
+    const valid = error == null;
+
+    if (valid) {
+      next();
+    } else {
+      const { details } = error;
+      const message = details.map(i => i.message).join(",");
+
+      console.log("error", message);
+      res.status(422).json({ error: message });
+    }
+  };
+};
+
+module.exports = { setTokenMiddleware, validationMiddleware };
