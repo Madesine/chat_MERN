@@ -26,7 +26,6 @@ const register = async (req, res) => {
 
     res.status(500).send("Server error");
   }
-  res.json({ msg: "Hello world" });
 };
 
 module.exports = { register };

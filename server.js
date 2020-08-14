@@ -6,9 +6,11 @@ const auth = require("./api/routes/auth");
 
 const app = express();
 
-app.use("/api/auth", auth);
+app.use(express.json({ extended: false }));
 
 connectDb();
+
+app.use("/api/auth", auth);
 
 const PORT = process.env.PORT || 5000;
 
