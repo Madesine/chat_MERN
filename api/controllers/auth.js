@@ -20,7 +20,7 @@ const register = async (req, res) => {
 
     await user.save();
 
-    getToken();
+    getToken(user, res);
   } catch (error) {
     console.error(error.message);
 
@@ -28,4 +28,24 @@ const register = async (req, res) => {
   }
 };
 
-module.exports = { register };
+const login = async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!user || !isMatch) {
+      return res.status(400).json({ errors: [{ msg: "Invalid credentials" }] });
+    }
+
+    getToken(user, res);
+  } catch (err) {
+    console.log(err.message);
+
+    res.status(500).send("Server error");
+  }
+};
+
+module.exports = { register, login };
