@@ -1,7 +1,8 @@
 const jwt = require("jsonwebtoken");
 const config = require("config");
 
-const isTokenMiddleware = (req, res, next) => {
+const getTokenMiddleware = (req, res, next) => {
+  //	COOKIE NEEDED
   const token = req.header("auth-token");
 
   if (!token) {
@@ -35,4 +36,4 @@ const validationMiddleware = schema => {
   };
 };
 
-module.exports = { isTokenMiddleware, validationMiddleware };
+module.exports = { getTokenMiddleware, validationMiddleware };

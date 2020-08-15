@@ -1,7 +1,8 @@
 const bcrypt = require("bcryptjs");
 
 const User = require("../database/models/User");
-const getToken = require("../helpers/getToken");
+const setToken = require("../helpers/setToken");
+const sendEmail = require("../helpers/sendEmail");
 
 const register = async (req, res) => {
   const { name, email, password } = req.body;
@@ -20,10 +21,11 @@ const register = async (req, res) => {
 
     await user.save();
 
-    getToken(user, res);
+    const authToken = setToken(user);
+
+    res.json({ authToken });
   } catch (error) {
     console.error(error.message);
-
     res.status(500).send("Server error");
   }
 };
@@ -40,10 +42,11 @@ const login = async (req, res) => {
       return res.status(400).json({ errors: [{ msg: "Invalid credentials" }] });
     }
 
-    getToken(user, res);
-  } catch (err) {
-    console.log(err.message);
+    const authToken = setToken(user);
 
+    res.json({ authToken });
+  } catch (err) {
+    console.error(err.message);
     res.status(500).send("Server error");
   }
 };
@@ -51,11 +54,33 @@ const login = async (req, res) => {
 const getUser = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select("-password");
+
     res.json({ user });
   } catch (err) {
-    console.err(err.message);
+    console.error(err.message);
     res.status(500).send("Server error");
   }
 };
 
-module.exports = { register, login, getUser };
+const resetPasswordMail = async (req, res) => {
+  const { email } = req.body;
+  try {
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(400).json({ errors: [{ msg: "Invalid credentials" }] });
+    }
+
+    const resetPasswordToken = setToken(user, 600);
+    const setResetUrl = `${req.protocol}://${req.get("host")}${req.originalUrl}?token=${resetPasswordToken}`;
+
+    sendEmail(email, res, setResetUrl);
+
+    res.json({ setResetUrl });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server error");
+  }
+};
+
+module.exports = { register, login, getUser, resetPasswordMail };
