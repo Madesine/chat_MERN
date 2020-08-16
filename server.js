@@ -1,5 +1,6 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const cookieParser = require("cookie-parser");
 
 const connectDb = require("./api/database/connectToDb");
 const auth = require("./api/routes/auth");
@@ -7,6 +8,7 @@ const auth = require("./api/routes/auth");
 const app = express();
 
 app.use(express.json({ extended: false }));
+app.use(cookieParser());
 
 connectDb();
 
