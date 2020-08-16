@@ -21,9 +21,10 @@ const register = async (req, res) => {
 
     await user.save();
 
-    const authToken = setToken(user);
+    const token = setToken(user);
 
-    res.json({ authToken });
+    res.cookie("auth-token", token, { httpOnly: true, maxAge: 259200 });
+    res.json({ msg: "Successfully registered" });
   } catch (error) {
     console.error(error.message);
     res.status(500).send("Server error");
@@ -42,9 +43,10 @@ const login = async (req, res) => {
       return res.status(400).json({ errors: [{ msg: "Invalid credentials" }] });
     }
 
-    const authToken = setToken(user);
+    const token = setToken(user);
 
-    res.json({ authToken });
+    res.cookie("auth-token", token, { httpOnly: true, maxAge: 259200 });
+    res.json({ msg: "Successfully logged" });
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server error");
@@ -62,7 +64,11 @@ const getUser = async (req, res) => {
   }
 };
 
-const resetPasswordMail = async (req, res) => {
+const passwordRecovery = async (req, res) => {
+  if (!req.params) {
+    return res.json({ msg: "loh" });
+  }
+
   const { email } = req.body;
   try {
     const user = await User.findOne({ email });
@@ -71,8 +77,8 @@ const resetPasswordMail = async (req, res) => {
       return res.status(400).json({ errors: [{ msg: "Invalid credentials" }] });
     }
 
-    const resetPasswordToken = setToken(user, 600);
-    const setResetUrl = `${req.protocol}://${req.get("host")}${req.originalUrl}?token=${resetPasswordToken}`;
+    const token = setToken(user, 600);
+    const setResetUrl = `${req.protocol}://${req.get("host")}${req.originalUrl}?token=${token}`;
 
     sendEmail(email, res, setResetUrl);
 
@@ -83,4 +89,4 @@ const resetPasswordMail = async (req, res) => {
   }
 };
 
-module.exports = { register, login, getUser, resetPasswordMail };
+module.exports = { register, login, getUser, passwordRecovery };
