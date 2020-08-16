@@ -1,7 +1,7 @@
 const express = require("express");
 
 const router = express.Router();
-const { register, login, getUser, resetPasswordMail } = require("../controllers/auth");
+const { register, login, getUser, passwordRecovery } = require("../controllers/auth");
 const { registerSchema, loginSchema } = require("../validation/auth");
 const { validationMiddleware, getTokenMiddleware } = require("../middlewares/auth");
 
@@ -22,7 +22,12 @@ router.get("/login", getTokenMiddleware, getUser);
 
 // @route POST api/auth/login/recovery
 // @desc Send email with reset password link
-// @access Private
-router.post("/login/recovery", resetPasswordMail);
+// @access Public
+router.post("/login/recovery", passwordRecovery);
+
+// @route POST api/auth/login/recovery
+// @desc Send email with reset password link
+// @access Public
+router.get("/login/recovery", passwordRecovery);
 
 module.exports = router;
