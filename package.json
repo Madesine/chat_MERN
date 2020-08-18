@@ -38,7 +38,8 @@
 		"eslint-plugin-import": "^2.22.0",
 		"husky": "^4.2.5",
 		"lint-staged": "^10.2.11",
-		"nodemon": "^2.0.4"
+		"nodemon": "^2.0.4",
+		"prettier": "^2.0.5"
 	},
 	"husky": {
 		"hooks": {
@@ -47,8 +48,8 @@
 	},
 	"lint-staged": {
 		"*.{js,jsx}": [
-			"eslint --max-warnings=0",
-			"prettier --write"
+			"prettier --write",
+			"eslint --fix ../chat_MERN/ --max-warnings=0"
 		]
 	}
 }
