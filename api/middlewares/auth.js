@@ -1,7 +1,5 @@
-const jwt = require("jsonwebtoken");
-const config = require("config");
-
-const { Unauthorized, CustomError } = require("../utils/errors");
+const { Unauthorized, CustomError, NotFound } = require("../utils/errors");
+const { decodeToken } = require("../helpers/auth");
 
 const checkAuthTokenMiddleware = (req, res, next) => {
   const token = req.cookies["auth-token"];
@@ -11,13 +9,24 @@ const checkAuthTokenMiddleware = (req, res, next) => {
   }
 
   try {
-    const decoded = jwt.verify(token, config.get("jwtSecret"));
+    const decoded = decodeToken(token);
 
     req.user = decoded.user;
     next();
   } catch (err) {
     throw new Unauthorized("Token is not valid");
   }
+};
+
+const checkForgotPasswordTokenMiddleware = (req, res, next) => {
+  const { token } = req.query;
+
+  const decodedToken = decodeToken(token);
+
+  if (!token || !decodedToken) throw new NotFound();
+
+  req.user = decodedToken.user;
+  next();
 };
 
 const validationMiddleware = schema => {
@@ -39,4 +48,8 @@ const validationMiddleware = schema => {
   };
 };
 
-module.exports = { checkAuthTokenMiddleware, validationMiddleware };
+module.exports = {
+  checkAuthTokenMiddleware,
+  validationMiddleware,
+  checkForgotPasswordTokenMiddleware
+};

@@ -11,9 +11,7 @@ const register = async (req, res, next) => {
   try {
     let user = await User.findOne({ email });
 
-    if (user) {
-      throw new AlreadyExists();
-    }
+    if (user) throw new AlreadyExists();
 
     user = new User({ name, email, password });
     user.password = await hashPassword(password);
@@ -38,9 +36,7 @@ const login = async (req, res) => {
 
     const isMatch = await bcrypt.compare(password, user.password);
 
-    if (!user || !isMatch) {
-      throw new InvalidCredentials();
-    }
+    if (!user || !isMatch) throw new InvalidCredentials();
 
     const token = createToken({ user: { id: user.id } }, config.get("authExpiresIn"));
 
@@ -64,40 +60,41 @@ const getUser = async (req, res) => {
 };
 
 const passwordRecovery = async (req, res, next) => {
-  // ?????????
-  // if (req.query.token) {
-  //   return res.status(400).json({ msg: "Can recover" });
-  // }
-
   const { email } = req.body;
 
   try {
     const user = await User.findOne({ email });
 
-    if (!user) {
-      throw new InvalidCredentials();
-    }
+    if (!user) throw new InvalidCredentials();
 
     const token = createToken({ user: { id: user.id } }, config.get("forgotPasswordExpiresIn"));
-    const setResetUrl = `${req.protocol}://${req.get("host")}${req.originalUrl}?token=${token}`;
+    const setResetUrl = `${req.protocol}://${req.get("host")}${req.originalUrl}/reset?token=${token}`;
 
     sendRecoverPasswordLink(email, setResetUrl);
 
     res.json({ msg: "Recover link was sent" });
-  } catch (err) {
+  } catch (error) {
     console.error(err.message);
-    next();
+    next(error);
   }
 };
 
-const resetPassword = (req, res) => {
-  const { token } = req.query;
+const resetPassword = async (req, res, next) => {
+  const { password } = req.body;
 
-  if (!token) {
-    throw new BadRequest("Link");
+  try {
+    const user = await User.findById(req.user.id);
+
+    if (user.password === password) throw new BadRequest("Your new password can not be similar to current password");
+    user.password = password;
+
+    await user.save();
+
+    res.json({ msg: "Password successfully changed" });
+  } catch (error) {
+    console.error(error.message);
+    next(error);
   }
-
-  res.json({ msg: "Success" });
 };
 
 module.exports = {

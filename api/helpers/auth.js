@@ -7,6 +7,10 @@ const createToken = (data, expiresIn) => {
   return jwt.sign(data, config.get("jwtSecret"), { expiresIn });
 };
 
+const decodeToken = token => {
+  return jwt.verify(token, config.get("jwtSecret"));
+};
+
 const hashPassword = async password => {
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
@@ -29,12 +33,13 @@ const sendRecoverPasswordLink = async (email, url) => {
     from: `"simpleContact" <${transporter.options.auth.user}>`,
     to: email,
     subject: "Reset password",
-    html: `Hi!<br/><br/>You made a request to change the password.<strong>Follow the link</strong> to set a new password.<br/><hr/><a href="${url}">Click here.</a>`
+    html: `Hi!<br/><br/>You made a request to change the password.<strong>Follow the link</strong> to set a new password.<br/><hr/><a href=${url}>Click here.</a>`
   });
 };
 
 module.exports = {
   createToken,
   hashPassword,
-  sendRecoverPasswordLink
+  sendRecoverPasswordLink,
+  decodeToken
 };
