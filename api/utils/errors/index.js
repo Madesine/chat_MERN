@@ -3,6 +3,7 @@ const CustomError = require("./CustomError");
 const BadRequest = require("./BadRequest/BadRequest");
 const AlreadyExists = require("./BadRequest/AlreadyExists");
 const InvalidCredentials = require("./BadRequest/InvalidCredentials");
+const NotFound = require("./BadRequest/NotFound");
 
 const Unauthorized = require("./Unauthorized/Unauthorized");
 
@@ -11,5 +12,6 @@ module.exports = {
   BadRequest,
   AlreadyExists,
   InvalidCredentials,
-  Unauthorized
+  Unauthorized,
+  NotFound
 };

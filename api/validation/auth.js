@@ -10,8 +10,11 @@ const authSchemas = {
     email: Joi.string().email().trim().required(),
     password: Joi.string().min(6).max(15).required()
   }),
-  passwordRecoverySchema: Joi.object().keys({
-    email: Joi.string().email().trim().required(),
+  emailSchema: Joi.object().keys({
+    email: Joi.string().email().trim().required()
+  }),
+  passwordSchema: Joi.object().keys({
+    password: Joi.string().min(6).max(15).required()
   })
 };
 

@@ -3,7 +3,7 @@ const config = require("config");
 
 const User = require("../database/models/User");
 const { createToken, hashPassword, sendRecoverPasswordLink } = require("../helpers/auth");
-const { AlreadyExists, InvalidCredentials } = require("../utils/errors");
+const { AlreadyExists, InvalidCredentials, BadRequest } = require("../utils/errors");
 
 const register = async (req, res, next) => {
   const { name, email, password } = req.body;
@@ -90,9 +90,20 @@ const passwordRecovery = async (req, res, next) => {
   }
 };
 
+const resetPassword = (req, res) => {
+  const { token } = req.query;
+
+  if (!token) {
+    throw new BadRequest("Link");
+  }
+
+  res.json({ msg: "Success" });
+};
+
 module.exports = {
   register,
   login,
   getUser,
-  passwordRecovery
+  passwordRecovery,
+  resetPassword
 };
