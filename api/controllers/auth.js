@@ -1,33 +1,32 @@
 const bcrypt = require("bcryptjs");
+const config = require("config");
 
 const User = require("../database/models/User");
-const setToken = require("../helpers/setToken");
-const sendEmail = require("../helpers/sendEmail");
+const { createToken, hashPassword, sendRecoverPasswordLink } = require("../helpers/auth");
+const { AlreadyExists, InvalidCredentials } = require("../utils/errors");
 
-const register = async (req, res) => {
+const register = async (req, res, next) => {
   const { name, email, password } = req.body;
 
   try {
     let user = await User.findOne({ email });
 
     if (user) {
-      return res.status(400).json({ errors: [{ msg: "Already exists" }] });
+      throw new AlreadyExists();
     }
 
     user = new User({ name, email, password });
-
-    const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(password, salt);
+    user.password = await hashPassword(password);
 
     await user.save();
 
-    const token = setToken(user);
+    const token = createToken({ user: { id: user.id } }, config.get("authExpiresIn"));
 
-    res.cookie("auth-token", token, { httpOnly: true, maxAge: 259200 });
+    res.cookie("auth-token", token, { httpOnly: true, maxAge: config.get("authExpiresIn") });
     res.json({ msg: "Successfully registered" });
   } catch (error) {
     console.error(error.message);
-    res.status(500).send("Server error");
+    next(error);
   }
 };
 
@@ -40,16 +39,16 @@ const login = async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!user || !isMatch) {
-      return res.status(400).json({ errors: [{ msg: "Invalid credentials" }] });
+      throw new InvalidCredentials();
     }
 
-    const token = setToken(user);
+    const token = createToken({ user: { id: user.id } }, config.get("authExpiresIn"));
 
-    res.cookie("auth-token", token, { httpOnly: true, maxAge: 259200 });
+    res.cookie("auth-token", token, { httpOnly: true, maxAge: config.get("authExpiresIn") });
     res.json({ msg: "Successfully logged" });
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send("Server error");
+  } catch (error) {
+    console.error(error.message);
+    next(error);
   }
 };
 
@@ -58,35 +57,42 @@ const getUser = async (req, res) => {
     const user = await User.findById(req.user.id).select("-password");
 
     res.json({ user });
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send("Server error");
+  } catch (error) {
+    console.error(error.message);
+    next(error);
   }
 };
 
-const passwordRecovery = async (req, res) => {
-  if (!req.params) {
-    return res.json({ msg: "loh" });
-  }
+const passwordRecovery = async (req, res, next) => {
+  // ?????????
+  // if (req.query.token) {
+  //   return res.status(400).json({ msg: "Can recover" });
+  // }
 
   const { email } = req.body;
+
   try {
     const user = await User.findOne({ email });
 
     if (!user) {
-      return res.status(400).json({ errors: [{ msg: "Invalid credentials" }] });
+      throw new InvalidCredentials();
     }
 
-    const token = setToken(user, 600);
+    const token = createToken({ user: { id: user.id } }, config.get("forgotPasswordExpiresIn"));
     const setResetUrl = `${req.protocol}://${req.get("host")}${req.originalUrl}?token=${token}`;
 
-    sendEmail(email, res, setResetUrl);
+    sendRecoverPasswordLink(email, setResetUrl);
 
-    res.json({ setResetUrl });
+    res.json({ msg: "Recover link was sent" });
   } catch (err) {
     console.error(err.message);
-    res.status(500).send("Server error");
+    next();
   }
 };
 
-module.exports = { register, login, getUser, passwordRecovery };
+module.exports = {
+  register,
+  login,
+  getUser,
+  passwordRecovery
+};

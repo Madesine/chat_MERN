@@ -42,6 +42,12 @@
       "function-paren-newline": 0,
       "array-element-newline": 0,
       "semi": ["error", "always"]
-    }
+		},
+		"parserOptions": {
+			"ecmaVersion": 6,
+			"ecmaFeatures": {
+				"experimentalObjectRestSpread": true
+			}
+		},
   }
   
