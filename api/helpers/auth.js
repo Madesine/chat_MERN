@@ -19,13 +19,15 @@ const hashPassword = async password => {
 };
 
 const sendRecoverPasswordLink = async (email, url) => {
+  const { host, port, senderEmail, senderPassword } = config.get("TransporterCredentials");
+
   const transporter = nodemailer.createTransport({
-    host: "smtp.mail.ru",
-    port: 465,
+    host,
+    port,
     secure: true,
     auth: {
-      user: "kurila28@mail.ru",
-      pass: config.get("mailPassword")
+      user: senderEmail,
+      pass: senderPassword
     }
   });
 
