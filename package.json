@@ -20,22 +20,26 @@
 	"dependencies": {
 		"bcryptjs": "^2.4.3",
 		"config": "^3.3.1",
+		"cookie-parser": "^1.4.5",
 		"express": "^4.17.1",
 		"express-validator": "^6.5.0",
 		"gravatar": "^1.8.0",
 		"joi": "^17.2.0",
 		"jsonwebtoken": "^8.5.1",
 		"mongoose": "^5.9.17",
+		"nodemailer": "^6.4.11",
 		"request": "^2.88.2"
 	},
 	"devDependencies": {
+		"babel-eslint": "^10.1.0",
 		"concurrently": "^5.2.0",
 		"eslint": "^7.6.0",
 		"eslint-config-airbnb-base": "^14.2.0",
 		"eslint-plugin-import": "^2.22.0",
 		"husky": "^4.2.5",
 		"lint-staged": "^10.2.11",
-		"nodemon": "^2.0.4"
+		"nodemon": "^2.0.4",
+		"prettier": "^2.0.5"
 	},
 	"husky": {
 		"hooks": {
@@ -44,8 +48,8 @@
 	},
 	"lint-staged": {
 		"*.{js,jsx}": [
-			"eslint --max-warnings=0",
-			"prettier --write"
+			"prettier --write",
+			"eslint --fix ../chat_MERN/ --max-warnings=0"
 		]
 	}
 }
