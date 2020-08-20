@@ -26,6 +26,7 @@ const checkForgotPasswordTokenMiddleware = (req, res, next) => {
   if (!token || !decodedToken) throw new NotFound();
 
   req.user = decodedToken.user;
+
   next();
 };
 

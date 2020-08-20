@@ -15,7 +15,9 @@ router.post("/login", validationMiddleware(loginSchema), login);
 router.get("/login", checkAuthTokenMiddleware, getUser);
 router.post("/login/recovery", validationMiddleware(emailSchema), passwordRecovery);
 
-router.get("/login/recovery/reset", checkForgotPasswordTokenMiddleware, getUser);
+router.get("/login/recovery/reset", checkForgotPasswordTokenMiddleware, (req, res) => {
+  res.json({ msg: "Access granted" });
+});
 router.post(
   "/login/recovery/reset",
   checkForgotPasswordTokenMiddleware,
