@@ -1,21 +1,33 @@
-const jwt = require("jsonwebtoken");
-const config = require("config");
+const { Unauthorized, CustomError, NotFound } = require("../utils/errors");
+const { decodeToken } = require("../helpers/auth");
 
-const setTokenMiddleware = (req, res, next) => {
-  const token = req.header("auth-token");
+const checkAuthTokenMiddleware = (req, res, next) => {
+  const token = req.cookies["auth-token"];
 
   if (!token) {
-    return res.status(401).json({ msg: "No token, authorization denied" });
+    throw new Unauthorized("No token, authorization denied");
   }
 
   try {
-    const decoded = jwt.verify(token, config.get("jwtSecret"));
+    const decoded = decodeToken(token);
 
     req.user = decoded.user;
     next();
   } catch (err) {
-    return res.status(401).json({ msg: "Token is not valid" });
+    throw new Unauthorized("Token is not valid");
   }
+};
+
+const checkForgotPasswordTokenMiddleware = (req, res, next) => {
+  const { token } = req.query;
+
+  const decodedToken = decodeToken(token);
+
+  if (!token || !decodedToken) throw new NotFound();
+
+  req.user = decodedToken.user;
+
+  next();
 };
 
 const validationMiddleware = schema => {
@@ -27,12 +39,18 @@ const validationMiddleware = schema => {
       next();
     } else {
       const { details } = error;
-      const message = details.map(i => i.message).join(",");
 
-      console.log("error", message);
-      res.status(422).json({ error: message });
+      const errorMessages = details.map(detail => {
+        return { [detail.context.key]: detail.message };
+      });
+
+      throw new CustomError(422, "Unprocessable Entity", "Invalid data", errorMessages);
     }
   };
 };
 
-module.exports = { setTokenMiddleware, validationMiddleware };
+module.exports = {
+  checkAuthTokenMiddleware,
+  validationMiddleware,
+  checkForgotPasswordTokenMiddleware
+};
